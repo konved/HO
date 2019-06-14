@@ -298,83 +298,83 @@ public class HOVerwaltung {
 	 * @return string index to use for given number.
 	 */
 	protected int getPluralIndex(int n) {
-		int id;
+		int i;
 
 		// Check for correct init (PluralRuleId MUST be set)
 		if (instance().getResource() == null) {
 			// Still not fully initialized. Trying to reinit.
 			setResource(UserParameter.instance().sprachDatei);
 			// We should never reach this code block
-			HOLogger.instance().log(getClass(), new String("getPluralIndex(): "+
+			HOLogger.instance().warning(getClass(), new String("getPluralIndex(): "+
 					"uninitialized HOVerwaltung instance.\n"+
-					"\tCalled with PluralRuleId="+getPluralRuleId()+" and PluralIndex="+n));
+					"\tCalled with PluralRuleId=" + getPluralRuleId() + " and PluralIndex=" + n));
 		}
 
 		switch (getPluralRuleId()) {
 			case 1: // Germanic, Finno-Ugric, some Romanic, Greek, Bulgarian, ...
 				// Two forms, singular for one only
-				id = n==1 ? 0 : 1;
+				i = n==1 ? 0 : 1;
 				break;
 			case 2:  // French, pt_BR
 				// Two forms, singular for zero and one
-				id = n<=1 ? 0 : 1;
+				i = n<=1 ? 0 : 1;
 				break;
 			case 3: // Latvian
 				// Three forms: ends in 0 and 11~19;ends in 1 excl 11;others
-				id = n%10==0 || (n%100>=11 && n%100<=19) ? 0 : n%10==1 && n%100 != 11 ? 1 : 2;
+				i = n%10==0 || (n%100>=11 && n%100<=19) ? 0 : n%10==1 && n%100 != 11 ? 1 : 2;
 				break;
 			case 4: // Scottish Gaelic
 				// Four forms: 1,11;2,12;3~10,13~19;others
-				id = n==1 || n==11 ? 0 : n==2 || n==12 ? 1 : (n>=3 && n<=10) || (n>=13 && n<=19) ? 2 : 3;
+				i = n==1 || n==11 ? 0 : n==2 || n==12 ? 1 : (n>=3 && n<=10) || (n>=13 && n<=19) ? 2 : 3;
 				break;
 			case 5: // Romanian
 				// Three forms: 1;0,ends in 01~19;others
-				id = n==1 ? 0 : n==0 || (n%100>=1 && n%100<=19) ? 1 : 2;
+				i = n==1 ? 0 : n==0 || (n%100>=1 && n%100<=19) ? 1 : 2;
 				break;
 			case 6: // Lithuanian
 				// Three forms: ends in 1 excl 11;ends in 2~9 excl 12~19;others
-				id = n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=9 && (n%100<11 || n%100>19) ? 1 : 2;
+				i = n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=9 && (n%100<11 || n%100>19) ? 1 : 2;
 				break;
 			case 7: // Belarusian, Russian, Ukrainian
 			case 19: // Bosnian, Croatian, Serbian - their rules differ from East Slavic only in unused case
 				// Three forms: ends in 1 excl 11;ends in 2~4 excl 12~14;others
-				id = n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : 2;
+				i = n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : 2;
 				break;
 			case 8: // Czech, Slovak
 				// Three forms: 1;is 2~4;others
-				id = n==1 ? 0 : n>=2 && n<=4 ? 1 : 2;
+				i = n==1 ? 0 : n>=2 && n<=4 ? 1 : 2;
 				break;
 			case 9: // Polish
 				// Three forms: 1;ends in 2~4 excl 12~14;others
-				id = n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : 2;
+				i = n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : 2;
 				break;
 			case 10: // Slovenian
 				// Four forms: ends in 01;in 02;in 03~04;others
-				id = n%100==1 ? 0 : n%100==2 ? 1 : n%100==3 || n%100==4 ? 2 : 3;
+				i = n%100==1 ? 0 : n%100==2 ? 1 : n%100==3 || n%100==4 ? 2 : 3;
 				break;
 			case 11: // Irish Gaelic
 				// Five forms: 1;2;3~6;7~10;others
-				id = n==1 ? 0 : n==2 ? 1 : n>=3 && n<=6 ? 2 : n>=7 && n<=10 ? 3 : 4;
+				i = n==1 ? 0 : n==2 ? 1 : n>=3 && n<=6 ? 2 : n>=7 && n<=10 ? 3 : 4;
 				break;
 			case 12: // Arabic
 				// Six forms: 1;2;ends in 03~10;others;ends in 00~02 excl 0~2;0
 				// (NB: We are using Mozilla's indices for the Arabic, not CLDR's ones)
-				id = n==1 ? 0 : n==2 ? 1 : n%100>=3 && n%100<=10 ? 2 :
+				i = n==1 ? 0 : n==2 ? 1 : n%100>=3 && n%100<=10 ? 2 :
 					n>=100 && n%100<=2 ? 4 : n==0 ? 5 : 3;
 				break;
 			case 13: // Maltese
 				// Four forms: 1;0,ends in 02~10;ends in 11~19;others
-				id = n==1 ? 0 : n==0 || (n%100>=2 && n%100<=10) ? 1 : n%100>=11 && n%100<=19 ? 2 : 3;
+				i = n==1 ? 0 : n==0 || (n%100>=2 && n%100<=10) ? 1 : n%100>=11 && n%100<=19 ? 2 : 3;
 				break;
 			case 15: // Icelandic, Macedonian
 				// Two forms: ends in 1 excl 11;others
-				id = n%10==1 || n%100!=11 ? 0 : 1;
+				i = n%10==1 || n%100!=11 ? 0 : 1;
 				break;
 			case 16: // Breton
 				// Five forms:
 				// ends in 1 excl 11,71,91;ends in 2 excl 12,72,92;
 				// ends in 3,4,9 excl 1x,7x,9x;ends in 1000000;others
-				id = n%10==1 && n%100!=11 && n%100!=71 && n%100!=91 ? 0 :
+				i = n%10==1 && n%100!=11 && n%100!=71 && n%100!=91 ? 0 :
 					n%10==2 && n%100!=12 && n%100!=72 && n%100!=92 ? 1 :
 					(n%10==3 || n%10==4 || n%10==9) && (n%100<13 || n%100>19) &&
 						(n%100<73 || n%100>79) && n%100<93 ? 2 :
@@ -382,20 +382,20 @@ public class HOVerwaltung {
 				break;
 			case 17: // Shuar
 				// Two forms: zero and others
-				id = n==0 ? 0 : 1;
+				i = n==0 ? 0 : 1;
 				break;
 			case 18: // Welsh
 				// Six forms: 0;1;2;3;6;others
-				id = n<=3 ? n : n==6 ? 4 : 5;
+				i = n<=3 ? n : n==6 ? 4 : 5;
 				break;
 			case 0: // most East Asian incl CJK, Persian, Turkish, ...
 			case 14: // unused
 			default: // no information
 				// no plurals, only one form
-				id = 0;
+				i = 0;
 				break;
 		}
-		return id;
+		return i;
 	}
 
 	/**
