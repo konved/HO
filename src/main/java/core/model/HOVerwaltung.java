@@ -441,26 +441,27 @@ public class HOVerwaltung {
 	/**
 	 * Returns the String connected to the active language file or connected to
 	 * the english language file. Returns !key! if the key can not be found.
-	 * 
+	 *
 	 * @param key
 	 *            Key to be searched in language files
-	 * 
-	 * @return String connected to the key or !key! if nothing can be found in
-	 *         language files
+	 * @param num
+	 *            Number to select proper pluralization. Value -1 means no pluralization
+	 * @return String connected to the key or its part if num is non-negative
+	 *         or !key! if nothing can be found in language files.
 	 */
-	public String getLanguageString(String key) {
+	public String getLanguageString(String key, int num) {
 		String temp = null;
+
 		try {
 			temp = languageBundle.getString(key);
 		} catch (Exception e) {
-			// Do nothing, it just throws error if key is missing. 
+			// Do nothing, it just throws error if key is missing.
 		}
-			if (temp != null)
-			return temp;
-		// Search in english.properties if nothing found and active language not
-		// english
+		if (temp != null)
+			return num<0 ? temp : getPluralForm(temp, num, false);
+
+		// Search in english.properties if nothing found and active language not english
 		if (!core.model.UserParameter.instance().sprachDatei.equalsIgnoreCase("english")) {
-			
 			ResourceBundle tempBundle = ResourceBundle.getBundle("sprache.English", new UTF8Control());
 
 			try {
@@ -468,9 +469,8 @@ public class HOVerwaltung {
 			} catch (Exception e) {
 				// Ignore
 			}
-			
 			if (temp != null)
-				return temp;
+				return num<0 ? temp : getPluralForm(temp, num, true);
 		}
 
 		HOLogger.instance().warning(getClass(), "getLanguageString: '" + key + "' not found!");
@@ -478,8 +478,29 @@ public class HOVerwaltung {
 	}
 
 	/**
+	 * Gets a parameterized pluralized message for the current language.
+	 */
+	public String getLanguageString(String key, int num, Object... values) {
+		String str = getLanguageString(key, num);
+		return MessageFormat.format(str, values);
+	}
+
+	/**
+	 * Returns the String connected to the active language file or connected to
+	 * the english language file. Returns !key! if the key can not be found.
+	 *
+	 * @param key
+	 *            Key to be searched in language files
+	 * @return String connected to the key or !key! if nothing can be found in
+	 *         language files
+	 */
+	public String getLanguageString(String key) {
+		return getLanguageString(key, -1);
+	}
+
+	/**
 	 * Gets a parameterized message for the current language.
-	 * 
+	 *
 	 * @param key
 	 *            the key for the message in the language file.
 	 * @param values
@@ -488,7 +509,7 @@ public class HOVerwaltung {
 	 *         replaced by the given value(s).
 	 */
 	public String getLanguageString(String key, Object... values) {
-		String str = getLanguageString(key);
+		String str = getLanguageString(key, -1);
 		return MessageFormat.format(str, values);
 	}
 }
