@@ -542,11 +542,11 @@ public class Player {
     	StringBuffer ret = new StringBuffer();
     	ret.append(years);
     	ret.append(" ");
-    	ret.append(HOVerwaltung.instance().getLanguageString("ls.player.age.years"));
+    	ret.append(HOVerwaltung.instance().getLanguageString("ls.player.age.years", years));
     	ret.append(" ");
     	ret.append(days);
     	ret.append(" ");
-    	ret.append(HOVerwaltung.instance().getLanguageString("ls.player.age.days"));
+    	ret.append(HOVerwaltung.instance().getLanguageString("ls.player.age.days", days));
     	if (birthday) {
     		ret.append(" (");
     		ret.append(HOVerwaltung.instance().getLanguageString("ls.player.age.birthday"));

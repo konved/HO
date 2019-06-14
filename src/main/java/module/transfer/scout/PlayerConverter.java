@@ -782,7 +782,8 @@ public class PlayerConverter {
             if (!ageDays.equals("")) {
                 player.setAgeDays(Integer.valueOf(ageDays).intValue());
             } else {
-                addErrorField(HOVerwaltung.instance().getLanguageString("ls.player.age.days"));
+				// Get the "many" variant
+                addErrorField(HOVerwaltung.instance().getLanguageString("ls.player.age.days", 89));
             }
 
             // clean lines till here

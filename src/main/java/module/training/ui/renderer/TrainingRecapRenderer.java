@@ -84,7 +84,8 @@ public class TrainingRecapRenderer extends DefaultTableCellRenderer {
             	if (calcPlayerAgePrevCol < calcPlayerAgeThisCol) {
             		String ageText =  HOVerwaltung.instance().getLanguageString("ls.player.age.birthday")
     								+ " (" + calcPlayerAgeThisCol + " "
-    								+  HOVerwaltung.instance().getLanguageString("ls.player.age.years")
+    								+  HOVerwaltung.instance().getLanguageString("ls.player.age.years",
+											calcPlayerAgeThisCol)
     								+ ")";
 
             		if (text == null || text.length() == 0) {
