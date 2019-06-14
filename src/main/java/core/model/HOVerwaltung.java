@@ -53,18 +53,7 @@ public class HOVerwaltung {
 	private HOVerwaltung() {
 	}
 
-	// -----------------Hilfsmethoden---------------------------------------------
-
-	/**
-	 * Set the HOModel.
-	 */
-	public void setModel(HOModel model) {
-		m_clHoModel = model;
-	}
-
-	public HOModel getModel() {
-		return m_clHoModel;
-	}
+	// ----------------- Auxiliary methods -----------------
 
 	/**
 	 * Get the HOVerwaltung singleton instance.
@@ -82,17 +71,38 @@ public class HOVerwaltung {
 		return m_clInstance;
 	}
 
-	public void setResource(String pfad) {
-		try {
-			 languageBundle = ResourceBundle.getBundle("sprache." + pfad, new UTF8Control());
-		} catch (Exception e) {
-			HOLogger.instance().log(getClass(), e);
-		}
-
+	public HOModel getModel() {
+		return m_clHoModel;
 	}
 
-	public ResourceBundle getResource() {
-		return languageBundle;
+	/**
+	 * Set the HOModel.
+	 */
+	public void setModel(HOModel model) {
+		m_clHoModel = model;
+	}
+
+	/**
+	 * interne Func die ein Model aus der DB lädt
+	 */
+	protected HOModel loadModel(int id) {
+		final HOModel model = new HOModel();
+		model.setSpieler(DBManager.instance().getSpieler(id));
+		model.setAllOldSpieler(DBManager.instance().getAllSpieler());
+		model.setAufstellung(DBManager.instance().getAufstellung(id, Lineup.DEFAULT_NAME));
+		model.setLastAufstellung(DBManager.instance().getAufstellung(id, Lineup.DEFAULT_NAMELAST));
+		model.setBasics(DBManager.instance().getBasics(id));
+		model.setFinanzen(DBManager.instance().getFinanzen(id));
+		model.setLiga(DBManager.instance().getLiga(id));
+		model.setStadium(DBManager.instance().getStadion(id));
+		model.setTeam(DBManager.instance().getTeam(id));
+		model.setVerein(DBManager.instance().getVerein(id));
+		model.setID(id);
+		model.setSpielplan(DBManager.instance().getSpielplan(-1, -1));
+		model.setXtraDaten(DBManager.instance().getXtraDaten(id));
+		model.setStaff(DBManager.instance().getStaffByHrfId(id));
+		
+		return model;
 	}
 
 	/**
@@ -170,29 +180,93 @@ public class HOVerwaltung {
 						+ ", mSum=" + mSum);
 	}
 
-	/**
-	 * interne Func die ein Model aus der DB lädt
-	 */
-	protected HOModel loadModel(int id) {
-		final HOModel model = new HOModel();
-		model.setSpieler(DBManager.instance().getSpieler(id));
-		model.setAllOldSpieler(DBManager.instance().getAllSpieler());
-		model.setAufstellung(DBManager.instance().getAufstellung(id, Lineup.DEFAULT_NAME));
-		model.setLastAufstellung(DBManager.instance().getAufstellung(id, Lineup.DEFAULT_NAMELAST));
-		model.setBasics(DBManager.instance().getBasics(id));
-		model.setFinanzen(DBManager.instance().getFinanzen(id));
-		model.setLiga(DBManager.instance().getLiga(id));
-		model.setStadium(DBManager.instance().getStadion(id));
-		model.setTeam(DBManager.instance().getTeam(id));
-		model.setVerein(DBManager.instance().getVerein(id));
-		model.setID(id);
-		model.setSpielplan(DBManager.instance().getSpielplan(-1, -1));
-		model.setXtraDaten(DBManager.instance().getXtraDaten(id));
-		model.setStaff(DBManager.instance().getStaffByHrfId(id));
-		
-		return model;
+	// ----------------- Translation bundles -----------------
+	
+	public ResourceBundle getResource() {
+		return languageBundle;
 	}
 
+	public void setResource(String pfad) {
+		try {
+			 languageBundle = ResourceBundle.getBundle("sprache." + pfad, new UTF8Control());
+		} catch (Exception e) {
+			HOLogger.instance().log(getClass(), e);
+		}
+
+	}
+
+	/**
+	 * Checked die Sprachdatei oder Fragt nach einer passenden
+	 */
+	public static void checkLanguageFile(String dateiname) {
+		try {
+            final java.io.InputStream sprachdatei = HOVerwaltung.class.getClassLoader().getResourceAsStream("sprache/" + dateiname
+					+ ".properties");
+
+			if (sprachdatei != null) {
+				double sprachfileversion = 0;
+				ResourceBundle temp = ResourceBundle.getBundle("sprache." + dateiname, new UTF8Control());
+
+				try {
+					sprachfileversion = Double.parseDouble(temp.getString("Version"));
+				} catch (Exception e) {
+					HOLogger.instance().log(HOMainFrame.class, "not use " + dateiname);
+				}
+
+//				if (sprachfileversion >= HO.SPRACHVERSION) {
+//					HOLogger.instance().log(HOMainFrame.class, "use " + dateiname);
+//
+//					// ok!!
+//					return;
+//				}
+
+				HOLogger.instance().log(HOMainFrame.class, "use " + dateiname);
+				// ok!!
+				return;
+
+				//HOLogger.instance().log(HOMainFrame.class, "not use " + dateiname);
+
+			}
+		} catch (Exception e) {
+			HOLogger.instance().log(HOMainFrame.class, "not use " + e);
+		}
+
+		// Irgendein Fehler -> neue Datei aussuchen!
+		// new gui.menue.optionen.InitOptionsDialog();
+		UserParameter.instance().sprachDatei = "English";
+	}
+
+	public static String[] getLanguageFileNames() {
+		String[] files = null;
+		final Vector<String> sprachdateien = new Vector<String>();
+
+		try {
+			// java.net.URL resource = new
+			// gui.vorlagen.ImagePanel().getClass().getClassLoader().getResource(
+			// "sprache" );
+
+//            java.net.URL url = HOVerwaltung.class.getClassLoader().getResource("sprache");
+//            java.net.JarURLConnection connection = (java.net.JarURLConnection) url.openConnection();
+//            String filepath = (String)connection.getJarFileURL().toURI();
+
+            java.io.InputStream is = HOVerwaltung.class.getClassLoader().getResourceAsStream("sprache/ListLanguages.txt");
+            java.util.Scanner s = new java.util.Scanner(is);
+            java.util.ArrayList<String> llist = new java.util.ArrayList<String>();
+            while (s.hasNext()){
+                llist.add(s.next());
+            }
+            s.close();
+
+            files = llist.toArray(new String[llist.size()]);
+
+		} catch (Exception e) {
+			HOLogger.instance().log(HOVerwaltung.class, e);
+		}
+
+		return files;
+	}
+
+	// ----------------- Translations -----------------
 
 	/**
 	 * Returns the String connected to the active language file or connected to
@@ -246,76 +320,5 @@ public class HOVerwaltung {
 	public String getLanguageString(String key, Object... values) {
 		String str = getLanguageString(key);
 		return MessageFormat.format(str, values);
-	}
-
-	public static String[] getLanguageFileNames() {
-		String[] files = null;
-		final Vector<String> sprachdateien = new Vector<String>();
-
-		try {
-			// java.net.URL resource = new
-			// gui.vorlagen.ImagePanel().getClass().getClassLoader().getResource(
-			// "sprache" );
-
-//            java.net.URL url = HOVerwaltung.class.getClassLoader().getResource("sprache");
-//            java.net.JarURLConnection connection = (java.net.JarURLConnection) url.openConnection();
-//            String filepath = (String)connection.getJarFileURL().toURI();
-
-            java.io.InputStream is = HOVerwaltung.class.getClassLoader().getResourceAsStream("sprache/ListLanguages.txt");
-            java.util.Scanner s = new java.util.Scanner(is);
-            java.util.ArrayList<String> llist = new java.util.ArrayList<String>();
-            while (s.hasNext()){
-                llist.add(s.next());
-            }
-            s.close();
-
-            files = llist.toArray(new String[llist.size()]);
-
-		} catch (Exception e) {
-			HOLogger.instance().log(HOVerwaltung.class, e);
-		}
-
-		return files;
-	}
-
-	/**
-	 * Checked die Sprachdatei oder Fragt nach einer passenden
-	 */
-	public static void checkLanguageFile(String dateiname) {
-		try {
-            final java.io.InputStream sprachdatei = HOVerwaltung.class.getClassLoader().getResourceAsStream("sprache/" + dateiname
-					+ ".properties");
-
-			if (sprachdatei != null) {
-				double sprachfileversion = 0;
-				ResourceBundle temp = ResourceBundle.getBundle("sprache." + dateiname, new UTF8Control());
-
-				try {
-					sprachfileversion = Double.parseDouble(temp.getString("Version"));
-				} catch (Exception e) {
-					HOLogger.instance().log(HOMainFrame.class, "not use " + dateiname);
-				}
-
-//				if (sprachfileversion >= HO.SPRACHVERSION) {
-//					HOLogger.instance().log(HOMainFrame.class, "use " + dateiname);
-//
-//					// ok!!
-//					return;
-//				}
-
-				HOLogger.instance().log(HOMainFrame.class, "use " + dateiname);
-				// ok!!
-				return;
-
-				//HOLogger.instance().log(HOMainFrame.class, "not use " + dateiname);
-
-			}
-		} catch (Exception e) {
-			HOLogger.instance().log(HOMainFrame.class, "not use " + e);
-		}
-
-		// Irgendein Fehler -> neue Datei aussuchen!
-		// new gui.menue.optionen.InitOptionsDialog();
-		UserParameter.instance().sprachDatei = "English";
 	}
 }
