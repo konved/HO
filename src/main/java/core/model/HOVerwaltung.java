@@ -398,6 +398,44 @@ public class HOVerwaltung {
 		return id;
 	}
 
+	/**
+	 * Gets plural form of string according to pluralization rule for
+	 * the current language.
+	 *
+	 * @param str
+	 *            message in the language file.
+	 * @param num
+	 *            used to determine the plural form
+	 * @param fb
+	 *            logical flag: true means fallback to English with its two forms
+	 * @return part of the message selected by pluralization rule for
+	 *         the current language.
+	 */
+	protected String getPluralForm(String str, int num, boolean fb) {
+		String plForm;
+		String[] parts = str.split(PluralFormsSeparator); // "day;days" -> {"day", "days"}
+		int i = 0;
+
+		if (fb) {
+			i = num==1 ? 0 : 1;// Fallback to English with its 2 plural forms
+		} else {
+			i = getPluralIndex(num);
+		}
+		try {
+			plForm = parts[i];
+		} catch (Exception e) { // wrong message, index out of bounds
+			HOLogger.instance().debug(getClass(), new String("Couldn't get part of string.\n" +
+					"\tGot str=" + str + " and index("+num+")=" + i));
+			HOLogger.instance().warning(getClass(), e);
+			plForm = str; // return unsplitted
+		}
+		return plForm;
+	}
+
+	protected String getPluralForm(String str, int num) {
+		return getPluralForm(str, num, false);
+	}
+
 	// ---- Methods to get translated string ----
 
 	/**
